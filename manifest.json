@@ -1,0 +1,11 @@
+{
+  "background_color": "#ffffff",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "Dairy Management App",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "Milk_Dairy_App",
+  "start_url": "/",
+  "theme_color": "#ffffff"
+}
