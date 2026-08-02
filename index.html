@@ -1,0 +1,2121 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Milk Dairy Management System</title>
+    
+    <!-- Firebase Compat SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    
+    <!-- html2canvas Library for Image Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <style>
+        :root {
+            --primary: #059669;
+            --primary-dark: #047857;
+            --primary-light: #ecfdf5;
+            --secondary: #2563eb;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --danger: #dc2626;
+            --whatsapp: #10b981;
+            --border-color: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* 7-Color Smooth Animated Background */
+        body {
+            background: linear-gradient(-45deg, #0f172a, #047857, #1e3a8a, #7c3aed, #db2777, #ea580c, #0d9488);
+            background-size: 500% 500%;
+            animation: gradientBG 20s ease infinite;
+            color: #1e293b;
+            min-height: 100vh;
+            padding-bottom: 40px;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            20% { background-position: 100% 20%; }
+            40% { background-position: 50% 100%; }
+            60% { background-position: 20% 80%; }
+            80% { background-position: 80% 0%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        header {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+
+        header h2 {
+            font-size: 20px;
+            letter-spacing: 0.5px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 24px auto;
+            padding: 0 16px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 24px;
+            border-radius: 20px;
+            box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.15), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .card h3 {
+            font-size: 19px;
+            color: var(--dark);
+            margin-bottom: 6px;
+            font-weight: 700;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            transition: all 0.25s ease;
+            margin-top: 8px;
+            box-shadow: 0 4px 15px rgba(5, 150, 105, 0.25);
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover { 
+            background: var(--primary-dark); 
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(5, 150, 105, 0.35);
+        }
+        .btn:active { transform: translateY(0); }
+        .btn:disabled { background: #cbd5e1; box-shadow: none; cursor: not-allowed; }
+        .btn-danger { background: var(--danger); box-shadow: 0 4px 15px rgba(220, 38, 38, 0.25); }
+        .btn-danger:hover { background: #b91c1c; box-shadow: 0 6px 20px rgba(220, 38, 38, 0.35); }
+        .btn-secondary { background: var(--secondary); box-shadow: 0 4px 15px rgba(37, 99, 235, 0.25); }
+        .btn-secondary:hover { background: #1d4ed8; box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35); }
+        .btn-whatsapp { background: var(--whatsapp); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.25); }
+        .btn-whatsapp:hover { background: #059669; }
+        .btn-back { background: #64748b; box-shadow: 0 4px 15px rgba(100, 116, 139, 0.25); }
+        .btn-back:hover { background: #475569; }
+
+        .button-group-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .button-group-2 .btn {
+            margin-top: 0;
+            width: 100%;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 15px;
+            max-width: 320px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .dash-btn {
+            aspect-ratio: 1 / 1;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            border-radius: 16px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 700;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            text-align: center;
+            padding: 10px;
+            transition: all 0.25s ease;
+        }
+
+        .dash-btn:hover {
+            transform: translateY(-3px);
+            filter: brightness(0.97);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .dash-icon-wrapper {
+            font-size: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            font-size: 13px;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 13px 16px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 15px;
+            color: var(--dark);
+            background: #fff;
+            transition: all 0.2s;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px var(--primary-light);
+        }
+
+        .checkbox-group {
+            display: flex;
+            gap: 20px;
+            background: #f8fafc;
+            padding: 12px 16px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 12px;
+        }
+
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--dark);
+            text-transform: none;
+            cursor: pointer;
+            margin-bottom: 0;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
+        .mode-switch-container {
+            display: flex;
+            background: #f1f5f9;
+            padding: 4px;
+            border-radius: 14px;
+            margin-bottom: 20px;
+            gap: 4px;
+        }
+
+        .mode-switch-container label {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #64748b;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .mode-switch-container input[type="radio"] {
+            display: none;
+        }
+
+        .mode-switch-container input[type="radio"]:checked + span {
+            color: var(--primary-dark);
+        }
+
+        .mode-switch-container label:has(input[type="radio"]:checked) {
+            background: #ffffff;
+            color: var(--primary-dark);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .page { display: none; }
+        .page.active { display: block !important; animation: fadeIn 0.2s ease-out; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1000; 
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            background-color: rgba(15, 23, 42, 0.65); 
+            backdrop-filter: blur(6px);
+            overflow: auto;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            margin: 10% auto;
+            padding: 24px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 340px;
+            box-shadow: 0 25px 30px -10px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            animation: modalScale 0.2s ease-out;
+        }
+
+        @keyframes modalScale {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        #thermalBillCard {
+            width: 300px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 15px;
+            font-family: 'Courier New', Courier, monospace;
+            color: #000;
+            border: 1px dashed #94a3b8;
+            border-radius: 6px;
+            text-align: left;
+            margin-bottom: 10px;
+        }
+
+        .thermal-header {
+            text-align: center;
+            border-bottom: 1px dashed #000;
+            padding-bottom: 6px;
+            margin-bottom: 8px;
+        }
+
+        .thermal-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+
+        .modal-actions {
+            display: grid;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .popup-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .popup-buttons .btn {
+            margin-top: 0;
+        }
+
+        #syncStatus {
+            font-size: 11px;
+            color: #34d399;
+            font-weight: 600;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .society-bill-card {
+            background: #f8fafc;
+            border: 1.5px solid var(--border-color);
+            border-radius: 14px;
+            padding: 14px;
+            margin-bottom: 12px;
+            text-align: left;
+        }
+
+        .society-bill-card h4 {
+            font-size: 15px;
+            color: var(--dark);
+            margin-bottom: 6px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div>
+            <h2 style="margin: 0;">🥛 MyDairyApp</h2>
+            <div id="syncStatus">🟢 Cloud Active</div>
+        </div>
+        <button id="logoutBtn" class="btn btn-danger" style="width: auto; padding: 6px 12px; margin-top:0; font-size: 13px; display: none;" onclick="logout()">Logout</button>
+    </header>
+
+    <div class="container">
+
+        <!-- AUTH PAGE -->
+        <div id="page-auth" class="page active">
+            <div class="card">
+                <h3 id="authTitle" style="text-align: center; margin-bottom: 20px; font-size: 22px;">Dairy Login</h3>
+                <form id="authForm" onsubmit="handleAuth(event)">
+                    <div class="form-group">
+                        <label>Mobile Number</label>
+                        <input type="tel" id="authMobile" maxlength="10" inputmode="numeric" required placeholder="10 digit Mobile No.">
+                    </div>
+                    <div class="form-group">
+                        <label>6-Digit Password (PIN)</label>
+                        <input type="password" id="authPin" minlength="6" maxlength="6" inputmode="numeric" required placeholder="6 digit PIN">
+                    </div>
+                    <button type="submit" class="btn" id="authSubmitBtn">Login</button>
+                </form>
+                <p style="text-align: center; margin-top: 20px; font-size: 14px; color: #64748b;">
+                    <span id="authToggleText">Account nahi hai?</span> 
+                    <a href="javascript:void(0)" onclick="toggleAuthMode()" id="authToggleLink" style="color: var(--primary); font-weight: 700; text-decoration: none;">Register Karein</a>
+                </p>
+            </div>
+        </div>
+
+        <!-- DASHBOARD PAGE -->
+        <div id="page-dashboard" class="page">
+            <div class="card">
+                <h3>Smart Dashboard</h3>
+                <p style="color: #64748b; font-size: 14px; margin-top: 4px; margin-bottom: 10px;">Apna dairy kaam asani se manage karein:</p>
+                
+                <div class="dashboard-grid">
+                    <div class="dash-btn" onclick="openSupplierManager('add')" style="background: #ecfdf5; color: #047857; box-shadow: 0 4px 15px rgba(5, 150, 105, 0.08);">
+                        <div class="dash-icon-wrapper">👨‍🌾</div>
+                        <span>Manage Supplier</span>
+                    </div>
+                    <div class="dash-btn" onclick="openSocietyManager('add')" style="background: #eff6ff; color: #1d4ed8; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.08);">
+                        <div class="dash-icon-wrapper">🏢</div>
+                        <span>Manage Society</span>
+                    </div>
+                    <div class="dash-btn" onclick="openCustomerManager('add')" style="background: #fffbeb; color: #b45309; box-shadow: 0 4px 15px rgba(217, 119, 6, 0.08);">
+                        <div class="dash-icon-wrapper">👤</div>
+                        <span>Manage Customer</span>
+                    </div>
+                    <div class="dash-btn" onclick="openMilkEntryManager('daily')" style="background: #e6fffa; color: #065f46; box-shadow: 0 4px 15px rgba(4, 120, 87, 0.08);">
+                        <div class="dash-icon-wrapper">🥛</div>
+                        <span>Daily Milk Entry</span>
+                    </div>
+                    <div class="dash-btn" onclick="openBillingPage('single')" style="background: #f0f9ff; color: #0369a1; box-shadow: 0 4px 15px rgba(30, 64, 175, 0.08);">
+                        <div class="dash-icon-wrapper">📄</div>
+                        <span>Monthly Bill</span>
+                    </div>
+                    <div class="dash-btn" onclick="showPage('page-monthly-report')" style="background: #fff7ed; color: #c2410c; box-shadow: 0 4px 15px rgba(180, 83, 9, 0.08);">
+                        <div class="dash-icon-wrapper">📊</div>
+                        <span>Monthly Report</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1. SUPPLIER MANAGER -->
+        <div id="page-supplier-manager" class="page">
+            <div class="card">
+                <div class="mode-switch-container">
+                    <label>
+                        <input type="radio" name="suppModeSwitch" id="radioAddSuppMode" value="add" onchange="switchSupplierMode()">
+                        <span>➕ Add Supplier</span>
+                    </label>
+                    <label>
+                        <input type="radio" name="suppModeSwitch" id="radioEditSuppMode" value="manage" onchange="switchSupplierMode()">
+                        <span>✏️ Update/Delete</span>
+                    </label>
+                </div>
+
+                <div id="sectionAddSupplier" style="display: none;">
+                    <h3 style="margin-bottom: 15px;">Add Supplier</h3>
+                    <form onsubmit="addSupplier(event)">
+                        <div class="form-group">
+                            <label>Supplier Name</label>
+                            <input type="text" id="suppName" required placeholder="Enter Supplier Name">
+                        </div>
+                        <div class="form-group">
+                            <label>Dairy Name (Billing Header)</label>
+                            <input type="text" id="suppDairyName" required placeholder="Enter Dairy Name for Bill">
+                        </div>
+                        <div class="form-group">
+                            <label>Mobile Number (Optional)</label>
+                            <input type="tel" id="suppPhone" maxlength="10" inputmode="numeric" placeholder="Enter Mobile Number">
+                        </div>
+                        <div class="button-group-2">
+                            <button type="button" class="btn btn-back" onclick="showPage('page-dashboard')">⬅️ Back</button>
+                            <button type="submit" class="btn">Save Supplier</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="sectionManageSupplier" style="display: none;">
+                    <h3 style="margin-bottom: 15px;">Edit / Delete Supplier</h3>
+                    <div class="form-group">
+                        <label>Select Supplier</label>
+                        <select id="editSuppSelect" onchange="loadSupplierDataForEdit()" required>
+                            <option value="">-- Select Supplier --</option>
+                        </select>
+                    </div>
+
+                    <div id="editSupplierFormContainer" style="display: none; border-top: 1.5px dashed var(--border-color); padding-top: 16px; margin-top: 16px;">
+                        <div class="form-group">
+                            <label>Supplier Name</label>
+                            <input type="text" id="editSuppName" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Dairy Name (Billing Header)</label>
+                            <input type="text" id="editSuppDairyName" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Mobile Number</label>
+                            <input type="tel" id="editSuppPhone" maxlength="10" inputmode="numeric" placeholder="Enter Mobile Number">
+                        </div>
+                        <button class="btn" onclick="promptUpdateSupplier()" style="margin-bottom: 10px;">Update Details</button>
+                        <button class="btn btn-danger" onclick="promptDeleteSupplier()" style="margin-bottom: 10px;">Delete Supplier</button>
+                    </div>
+                    <div style="margin-top: 15px;">
+                        <button type="button" class="btn btn-back" onclick="showPage('page-dashboard')">⬅️ Back</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. SOCIETY MANAGER -->
+        <div id="page-society-manager" class="page">
+            <div class="card">
+                <div class="mode-switch-container">
+                    <label>
+                        <input type="radio" name="socModeSwitch" id="radioAddSocMode" value="add" onchange="switchSocietyMode()">
+                        <span>➕ Nayi Society</span>
+                    </label>
+                    <label>
+                        <input type="radio" name="socModeSwitch" id="radioEditSocMode" value="manage" onchange="switchSocietyMode()">
+                        <span>✏️ Update/Delete</span>
+                    </label>
+                </div>
+
+                <div id="sectionAddSociety" style="display: none;">
+                    <h3 style="margin-bottom: 15px;">Add Society</h3>
+                    <form onsubmit="addSociety(event)">
+                        <div class="form-group">
+                            <label>Select Supplier</label>
+                            <select id="societySupplierSelect" required>
+                                <option value="">-- Select Supplier --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Society Name</label>
+                            <input type="text" id="societyName" required placeholder="Enter Society Name">
+                        </div>
+                        <div class="button-group-2">
+                            <button type="button" class="btn btn-back" onclick="showPage('page-dashboard')">⬅️ Back</button>
+                            <button type="submit" class="btn">Save Society</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="sectionManageSociety" style="display: none;">
+                    <h3 style="margin-bottom: 15px;">Edit / Delete Society</h3>
+                    <div class="form-group">
+                        <label>Select Supplier</label>
+                        <select id="editSocSupplierSelect" onchange="filterSocietyDropdown('editSocSupplierSelect', 'editSocSelect'); document.getElementById('editSocietyFormContainer').style.display='none';" required>
+                            <option value="">-- Select Supplier --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Select Society</label>
+                        <select id="editSocSelect" onchange="loadSocietyDataForEdit()" required>
+                            <option value="">-- Select Society --</option>
+                        </select>
+                    </div>
+
+                    <div id="editSocietyFormContainer" style="display: none; border-top: 1.5px dashed var(--border-color); padding-top: 16px; margin-top: 16px;">
+                        <div class="form-group">
+                            <label>Society Name</label>
+                            <input type="text" id="editSocName" required>
+                        </div>
+                        <button class="btn" onclick="promptUpdateSociety()" style="margin-bottom: 10px;">Update Details</button>
+                        <button class="btn btn-danger" onclick="promptDeleteSociety()" style="margin-bottom: 10px;">Delete Society</button>
+                    </div>
+                    <div style="margin-top: 15px;">
+                        <button type="button" class="btn btn-back" onclick="showPage('page-dashboard')">⬅️ Back</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. CUSTOMER MANAGER -->
+        <div id="page-customer-manager" class="page">
+            <div class="card">
+                <div class="mode-switch-container">
+                    <label>
+                        <input type="radio" name="custModeSwitch" id="radioAddMode" value="add" onchange="switchCustomerMode()">
+                        <span>➕ Naya Customer</span>
+                    </label>
+                    <label>
+                        <input type="radio" name="custModeSwitch" id="radioEditMode" value="manage" onchange="switchCustomerMode()">
+                        <span>✏️ Update/Delete</span>
+                    </label>
+                </div>
+
+                <div id="sectionAddCustomer" style="display: none;">
+                    <h3 style="margin-bottom: 15px;">Add New Customer</h3>
+                    <form onsubmit="addCustomer(event)">
+                        <div class="form-group">
+                            <label>Select Supplier</label>
+                            <select id="custSupplierSelect" onchange="filterSocietyDropdown('custSupplierSelect', 'custSocietySelect')" required>
+                                <option value="">-- Select Supplier --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Select Society</label>
+                            <select id="custSocietySelect" required>
+                                <option value="">-- Select Society --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Customer Name</label>
+                            <input type="text" id="custName" required placeholder="Enter Customer Name">
+                        </div>
+                        <div class="form-group">
+                            <label>Mobile Number</label>
+                            <input type="tel" id="custPhone" maxlength="10" inputmode="numeric" required placeholder="Enter Mobile Number">
+                        </div>
+                        <div class="form-group">
+                            <label>Milk Type Preference</label>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" id="custCow" checked> Cow Milk</label>
+                                <label><input type="checkbox" id="custBuffalo"> Buffalo Milk</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Milk Rate (₹/Litre)</label>
+                            <input type="number" id="custRate" value="50" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Default Morning Milk (Liters)</label>
+                            <input type="number" step="0.1" id="custMorningMilk" value="1.0" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Default Evening Milk (Liters)</label>
+                            <input type="number" step="0.1" id="custEveningMilk" value="0.0" required>
+                        </div>
+                        <div class="button-group-2">
+                            <button type="button" class="btn btn-back" onclick="showPage('page-dashboard')">⬅️ Back</button>
+                            <button type="submit" class="btn">Save Customer</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="sectionManageCustomer" style="display: none;">
+                    <h3 style="margin-bottom: 15px;">Edit / Delete Customer</h3>
+                    <div class="form-group">
+                        <label>Select Supplier</label>
+                        <select id="editCustSupplierSelect" onchange="filterSocietyDropdown('editCustSupplierSelect', 'editCustSocietySelect')" required>
+                            <option value="">-- Select Supplier --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Select Society</label>
+                        <select id="editCustSocietySelect" onchange="filterCustomerDropdown('editCustSupplierSelect', 'editCustSocietySelect', 'editCustSelect')" required>
+                            <option value="">-- Select Society --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Select Customer</label>
+                        <select id="editCustSelect" onchange="loadCustomerDataForEdit()" required>
+                            <option value="">-- Select Customer --</option>
+                        </select>
+                    </div>
+
+                    <div id="editCustomerFormContainer" style="display: none; border-top: 1.5px dashed var(--border-color); padding-top: 16px; margin-top: 16px;">
+                        <div class="form-group">
+                            <label>Customer Name</label>
+                            <input type="text" id="editCustName" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Mobile Number</label>
+                            <input type="tel" id="editCustPhone" maxlength="10" inputmode="numeric" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Milk Type Preference</label>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" id="editCustCow"> Cow Milk</label>
+                                <label><input type="checkbox" id="editCustBuffalo"> Buffalo Milk</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Milk Rate (₹/Litre)</label>
+                            <input type="number" id="editCustRate" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Default Morning Milk (Liters)</label>
+                            <input type="number" step="0.1" id="editCustMorning" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Default Evening Milk (Liters)</label>
+                            <input type="number" step="0.1" id="editCustEvening" required>
+                        </div>
+                        <button class="btn" onclick="updateCustomerDetails()" style="margin-bottom: 10px;">Update Details</button>
+                        <button class="btn btn-danger" onclick="deleteSelectedCustomer()" style="margin-bottom: 10px;">Delete Customer</button>
+                    </div>
+                    <div style="margin-top: 15px;">
+                        <button type="button" class="btn btn-back" onclick="showPage('page-dashboard')">⬅️ Back</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. MILK ENTRY -->
+        <div id="page-milk-entry" class="page">
+            <div class="card">
+                <div class="mode-switch-container">
+                    <label>
+                        <input type="radio" name="entryModeSwitch" id="radioDailyEntryMode" value="daily" onchange="switchMilkEntryMode()">
+                        <span>🥛 Daily Entry</span>
+                    </label>
+                    <label>
+                        <input type="radio" name="entryModeSwitch" id="radioBulkEntryMode" value="bulk" onchange="switchMilkEntryMode()">
+                        <span>📅 Monthly Bulk</span>
+                    </label>
+                </div>
+
+                <div id="sectionDailyEntry" style="display: none;">
+                    <h3 style="margin-bottom: 15px;">Daily Milk Entry</h3>
+                    <form onsubmit="handleMilkEntrySubmit(event)">
+                        <div class="form-group">
+                            <label>Select Supplier</label>
+                            <select id="entrySupplierSelect" onchange="filterSocietyDropdown('entrySupplierSelect', 'entrySocietySelect')" required>
+                                <option value="">-- Select Supplier --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Select Society</label>
+                            <select id="entrySocietySelect" onchange="filterCustomerDropdown('entrySupplierSelect', 'entrySocietySelect', 'entryCustomerSelect')" required>
+                                <option value="">-- Select Society --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Select Customer</label>
+                            <select id="entryCustomerSelect" onchange="autoFillCustomerMilkData()" required>
+                                <option value="">-- Select Customer --</option>
+                            </select>
+                        </div>
+                        <div id="customerMilkBadge" style="margin-bottom: 15px; font-size: 13px; font-weight: bold; color: var(--secondary);"></div>
+                        <div class="form-group">
+                            <label>Date</label>
+                            <input type="date" id="entryDate" onchange="autoFillCustomerMilkData()" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Morning Milk (Liters)</label>
+                            <input type="number" step="0.1" id="entryMorning" placeholder="0.0" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Evening Milk (Liters)</label>
+                            <input type="number" step="0.1" id="entryEvening" placeholder="0.0" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Milk Rate (₹/Litre)</label>
+                            <input type="number" id="entryRate" required>
+                        </div>
+                        <div class="button-group-2">
+                            <button type="button" class="btn btn-back" onclick="showPage('page-dashboard')">⬅️ Back</button>
+                            <button type="submit" class="btn">Save Entry</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="sectionBulkEntry" style="display: none;">
+                    <h3 style="margin-bottom: 15px;">Bulk Monthly Entry</h3>
+                    <form onsubmit="handleBulkMonthlyEntry(event)">
+                        <div class="form-group">
+                            <label>Select Supplier</label>
+                            <select id="bulkSupplierSelect" onchange="filterSocietyDropdown('bulkSupplierSelect', 'bulkSocietySelect')" required>
+                                <option value="">-- Select Supplier --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Select Society</label>
+                            <select id="bulkSocietySelect" onchange="filterCustomerDropdown('bulkSupplierSelect', 'bulkSocietySelect', 'bulkCustomerSelect')" required>
+                                <option value="">-- Select Society --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Select Customer</label>
+                            <select id="bulkCustomerSelect" onchange="autoFillBulkCustomerData()" required>
+                                <option value="">-- Select Customer --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Select Month</label>
+                            <input type="month" id="bulkMonth" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Morning Milk (Liters - Har Din)</label>
+                            <input type="number" step="0.1" id="bulkMorning" placeholder="1.0" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Evening Milk (Liters - Har Din)</label>
+                            <input type="number" step="0.1" id="bulkEvening" placeholder="0.0" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Milk Rate (₹/Litre)</label>
+                            <input type="number" id="bulkRate" required>
+                        </div>
+                        <div class="button-group-2">
+                            <button type="button" class="btn btn-back" onclick="showPage('page-dashboard')">⬅️ Back</button>
+                            <button type="submit" class="btn" style="background: #6366f1;">Save Full Month</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. COMBINED BILLING PAGE -->
+        <div id="page-bill-generator" class="page">
+            <div class="card">
+                <!-- Top Switcher Buttons inside Monthly Bill Page -->
+                <div class="mode-switch-container">
+                    <label>
+                        <input type="radio" name="billModeSwitch" id="radioSingleBill" value="single" onchange="switchBillingMode()">
+                        <span>📄 Monthly Bill</span>
+                    </label>
+                    <label>
+                        <input type="radio" name="billModeSwitch" id="radioSocietyBill" value="society" onchange="switchBillingMode()">
+                        <span>🏢 Society Wise Bill</span>
+                    </label>
+                </div>
+
+                <!-- Single Customer Bill Section -->
+                <div id="sectionSingleBill">
+                    <h3 style="margin-bottom: 15px;">Monthly Bill Generator</h3>
+                    <div class="form-group">
+                        <label>Select Supplier</label>
+                        <select id="billSupplierSelect" onchange="filterSocietyDropdown('billSupplierSelect', 'billSocietySelect')" required>
+                            <option value="">-- Select Supplier --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Select Society</label>
+                        <select id="billSocietySelect" onchange="filterCustomerDropdown('billSupplierSelect', 'billSocietySelect', 'billCustomerSelect')" required>
+                            <option value="">-- Select Society --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Select Customer</label>
+                        <select id="billCustomerSelect" required>
+                            <option value="">-- Select Customer --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Select Month</label>
+                        <input type="month" id="billMonth" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Last Due Amount (₹)</label>
+                        <input type="number" id="billLastDue" value="0" min="0" placeholder="0">
+                    </div>
+                    <div class="button-group-2">
+                        <button type="button" class="btn btn-back" onclick="showPage('page-dashboard')">⬅️ Back</button>
+                        <button class="btn btn-secondary" onclick="generateThermalBill()">Generate Bill</button>
+                    </div>
+                </div>
+
+                <!-- Society Wise Bill Section -->
+                <div id="sectionSocietyBill" style="display: none;">
+                    <h3 style="margin-bottom: 15px;">Society Wise Bill Generator</h3>
+                    <div class="form-group">
+                        <label>Select Supplier</label>
+                        <select id="socBillSupplierSelect" onchange="filterSocietyDropdown('socBillSupplierSelect', 'socBillSocietySelect')" required>
+                            <option value="">-- Select Supplier --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Select Society</label>
+                        <select id="socBillSocietySelect" required>
+                            <option value="">-- Select Society --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Select Month</label>
+                        <input type="month" id="socBillMonth" required>
+                    </div>
+                    <div class="button-group-2">
+                        <button type="button" class="btn btn-back" onclick="showPage('page-dashboard')">⬅️ Back</button>
+                        <button class="btn btn-whatsapp" onclick="generateSocietyWiseBill()">Generate Society Bill</button>
+                    </div>
+
+                    <!-- Society Generated Bills Output Container -->
+                    <div id="societyBillsResultContainer" style="margin-top: 20px; display: none;">
+                        <hr style="border: 1px dashed var(--border-color); margin-bottom: 15px;">
+                        <h4 style="font-size: 16px; margin-bottom: 12px; color: var(--dark);">Generated Society Customer Bills:</h4>
+                        <div id="societyBillsCardsList"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. MONTHLY REPORT -->
+        <div id="page-monthly-report" class="page">
+            <div class="card">
+                <h3>Customer Monthly Report</h3>
+                <div class="form-group">
+                    <label>Select Supplier</label>
+                    <select id="reportSupplierSelect" onchange="filterSocietyDropdown('reportSupplierSelect', 'reportSocietySelect')" required>
+                        <option value="">-- Select Supplier --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Select Society</label>
+                    <select id="reportSocietySelect" onchange="filterCustomerDropdown('reportSupplierSelect', 'reportSocietySelect', 'reportCustomerSelect')" required>
+                        <option value="">-- Select Society --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Select Customer</label>
+                    <select id="reportCustomerSelect" required>
+                        <option value="">-- Select Customer --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Select Month</label>
+                    <input type="month" id="reportMonth" required>
+                </div>
+                <div class="button-group-2">
+                    <button type="button" class="btn btn-back" onclick="showPage('page-dashboard')">⬅️ Back</button>
+                    <button class="btn btn-secondary" onclick="loadCustomerMonthlyReport()">View Report</button>
+                </div>
+                
+                <div id="reportResultContainer" style="margin-top: 20px; display: none;">
+                    <hr style="border: 1px dashed var(--border-color); margin-bottom: 15px;">
+                    <h4 id="reportTitle" style="font-size: 16px; margin-bottom: 10px; color: var(--dark);"></h4>
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse; font-size: 13px; text-align: left;">
+                            <thead>
+                                <tr style="background: #f1f5f9; border-bottom: 2px solid var(--border-color);">
+                                    <th style="padding: 8px;">Date</th>
+                                    <th style="padding: 8px;">Morning</th>
+                                    <th style="padding: 8px;">Evening</th>
+                                    <th style="padding: 8px;">Total (L)</th>
+                                    <th style="padding: 8px;">Amount (₹)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reportTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                    <div style="margin-top: 15px; background: #ecfdf5; padding: 12px; border-radius: 10px; font-weight: bold; font-size: 14px; color: var(--primary-dark);">
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>Total Liters: <span id="repTotalLiters">0</span> L</span>
+                            <span>Grand Total: <span id="repTotalAmt">₹0</span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- UPDATE MODAL -->
+    <div id="updateConfirmModal" class="modal">
+        <div class="modal-content">
+            <h3 style="color: var(--secondary); margin-bottom: 10px; font-size: 18px;">⚠️ Entry Maujood Hai!</h3>
+            <p id="updateConfirmMsg" style="font-size: 14px; color: #475569; line-height: 1.5;">Is Customer ki is date me entry pehle se hai. Update karein?</p>
+            <div class="popup-buttons">
+                <button class="btn" onclick="confirmUpdateEntry()">Yes</button>
+                <button class="btn btn-danger" onclick="closeUpdateModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SUPPLIER ACTION MODAL -->
+    <div id="supplierActionModal" class="modal">
+        <div class="modal-content">
+            <h3 id="supplierModalTitle" style="color: var(--secondary); margin-bottom: 10px; font-size: 18px;">⚠️ Confirm</h3>
+            <p id="supplierModalMsg" style="font-size: 14px; color: #475569; line-height: 1.5;"></p>
+            <div class="popup-buttons">
+                <button id="supplierModalYesBtn" class="btn" onclick="executeSupplierAction()">Yes</button>
+                <button class="btn btn-danger" onclick="closeSupplierActionModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SOCIETY ACTION MODAL -->
+    <div id="societyActionModal" class="modal">
+        <div class="modal-content">
+            <h3 id="societyModalTitle" style="color: var(--secondary); margin-bottom: 10px; font-size: 18px;">⚠️ Confirm</h3>
+            <p id="societyModalMsg" style="font-size: 14px; color: #475569; line-height: 1.5;"></p>
+            <div class="popup-buttons">
+                <button id="societyModalYesBtn" class="btn" onclick="executeSocietyAction()">Yes</button>
+                <button class="btn btn-danger" onclick="closeSocietyActionModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- BILL POP-UP MODAL -->
+    <div id="billModal" class="modal">
+        <div class="modal-content" style="margin: 8% auto; max-width: 320px;">
+            <div id="thermalBillCard">
+                <div class="thermal-header">
+                    <h3 id="tDairyName" style="margin-bottom: 2px; font-size: 15px;">CHIRAG MILK DAIRY</h3>
+                    <p style="font-size: 10px; color: #475569;">Monthly  Milk  Bill</p>
+                </div>
+                <div class="thermal-row"><span>Bill Date:</span><span id="tBillDate">-</span></div>
+                <div class="thermal-row"><span>Cust Name:</span><span id="tCustName">-</span></div>
+                <div class="thermal-row"><span>Milk Type:</span><span id="tMilkType" style="font-weight: bold;">-</span></div>
+                <div class="thermal-row"><span>Bill Month:</span><span id="tMonth">-</span></div>
+                <p style="border-bottom: 1px dashed #000; margin: 4px 0;"></p>
+                <div class="thermal-row"><span>Total Entry:</span><span id="tTotalDays">0</span></div>
+                <div class="thermal-row"><span>Total Milk:</span><span id="tTotalLiters">0 L</span></div>
+                <div class="thermal-row"><span>Milk Rate:</span><span id="tAvgRate">₹0</span></div>
+                <div class="thermal-row"><span>Milk Amount:</span><span id="tMilkAmount">₹0</span></div>
+                <div class="thermal-row"><span>Last Due:</span><span id="tLastDue">₹0</span></div>
+                <p style="border-bottom: 1px dashed #000; margin: 4px 0;"></p>
+                <div class="thermal-row" style="font-size: 14px; font-weight: bold;">
+                    <span>TOTAL BILL:</span><span id="tTotalAmount">₹0</span>
+                </div>
+                <p style="border-bottom: 1px dashed #000; margin: 4px 0;"></p>
+                <p style="text-align: center; font-size: 10px; color: #000; margin-top: 4px;">*** Thank You! ***</p>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn" style="background: #4f46e5;" onclick="shareBillAsImage()">📷 Share Bill Image</button>
+                <button class="btn btn-whatsapp" onclick="shareBillAsWhatsAppText()">📱Share Text Bill</button>
+                <button class="btn btn-danger" onclick="closeBillModal()">❌ Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- HIDDEN RENDER CONTAINER FOR SOCIETY IMAGE SHARING -->
+    <div id="societyImageRenderContainer" style="position: absolute; left: -9999px; top: -9999px;">
+        <div id="societyThermalBillCard" style="width: 300px; background: #ffffff; padding: 15px; font-family: 'Courier New', Courier, monospace; color: #000; border: 1px dashed #94a3b8; border-radius: 6px; text-align: left;">
+            <div class="thermal-header">
+                <h3 id="socTDairyName" style="margin-bottom: 2px; font-size: 15px;">CHIRAG MILK DAIRY</h3>
+                <p style="font-size: 10px; color: #475569;">Monthly  Milk  Bill</p>
+            </div>
+            <div class="thermal-row"><span>Bill Date:</span><span id="socTBillDate">-</span></div>
+            <div class="thermal-row"><span>Cust Name:</span><span id="socTCustName">-</span></div>
+            <div class="thermal-row"><span>Milk Type:</span><span id="socTMilkType" style="font-weight: bold;">-</span></div>
+            <div class="thermal-row"><span>Bill Month:</span><span id="socTMonth">-</span></div>
+            <p style="border-bottom: 1px dashed #000; margin: 4px 0;"></p>
+            <div class="thermal-row"><span>Total Entry:</span><span id="socTTotalDays">0</span></div>
+            <div class="thermal-row"><span>Total Milk:</span><span id="socTTotalLiters">0 L</span></div>
+            <div class="thermal-row"><span>Milk Rate:</span><span id="socTAvgRate">₹0</span></div>
+            <div class="thermal-row"><span>Milk Amount:</span><span id="socTMilkAmount">₹0</span></div>
+            <div class="thermal-row"><span>Last Due:</span><span id="socTLastDue">₹0</span></div>
+            <p style="border-bottom: 1px dashed #000; margin: 4px 0;"></p>
+            <div class="thermal-row" style="font-size: 14px; font-weight: bold;">
+                <span>TOTAL BILL:</span><span id="socTTotalAmount">₹0</span>
+            </div>
+            <p style="border-bottom: 1px dashed #000; margin: 4px 0;"></p>
+            <p style="text-align: center; font-size: 10px; color: #000; margin-top: 4px;">*** Thank You! ***</p>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCS7aWMXzf3P18x_sGE_P4es1Hb5GRZ_EA",
+            authDomain: "meri-dairy-91bf5.firebaseapp.com",
+            databaseURL: "https://meri-dairy-91bf5-default-rtdb.firebaseio.com",
+            projectId: "meri-dairy-91bf5",
+            storageBucket: "meri-dairy-91bf5.firebasestorage.app",
+            messagingSenderId: "585409283116",
+            appId: "1:585409283116:web:d2e82031c666ab6d74bd89"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        let currentUser = JSON.parse(localStorage.getItem('dairy_current_user')) || null;
+        let suppliers = [];
+        let societies = [];
+        let customers = [];
+        let milkEntries = [];
+        let isRegisterMode = false;
+        let pendingEntryData = null;
+        let currentSupplierActionType = ''; 
+        let currentSocietyActionType = ''; 
+
+        function getFormattedDate(date) {
+            let year = date.getFullYear();
+            let month = String(date.getMonth() + 1).padStart(2, '0');
+            let day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function checkMidnightDateTransition() {
+            let todayStr = getFormattedDate(new Date());
+            let savedDate = localStorage.getItem('appCurrentDate');
+
+            if (savedDate !== todayStr) {
+                localStorage.setItem('appCurrentDate', todayStr);
+                if (currentUser) {
+                    generateAutomaticDailyEntries();
+                }
+            }
+        }
+
+        setInterval(checkMidnightDateTransition, 60000);
+
+        function renderPageUI(pageId) {
+            checkMidnightDateTransition();
+
+            let pages = document.querySelectorAll('.page');
+            pages.forEach(p => {
+                p.classList.remove('active');
+                p.style.display = 'none';
+            });
+
+            let activePage = document.getElementById(pageId);
+            if (activePage) {
+                activePage.classList.add('active');
+                activePage.style.display = 'block';
+            }
+            
+            refreshDropdowns();
+            
+            let todayStr = getFormattedDate(new Date());
+            let currentYearMonth = todayStr.substring(0, 7);
+
+            if (pageId === 'page-milk-entry') {
+                let entryDateInput = document.getElementById('entryDate');
+                entryDateInput.max = todayStr;
+                if (!entryDateInput.value) {
+                    entryDateInput.value = todayStr;
+                }
+                autoFillCustomerMilkData();
+
+                let bulkMonthInput = document.getElementById('bulkMonth');
+                bulkMonthInput.max = currentYearMonth;
+                if (!bulkMonthInput.value) {
+                    bulkMonthInput.value = currentYearMonth;
+                }
+            }
+
+            if (pageId === 'page-bill-generator') {
+                let now = new Date();
+                now.setDate(1); 
+                now.setMonth(now.getMonth() - 1);
+                let year = now.getFullYear();
+                let month = String(now.getMonth() + 1).padStart(2, '0');
+                let prevMonthVal = `${year}-${month}`;
+                
+                let billMonthEl = document.getElementById('billMonth');
+                let socBillMonthEl = document.getElementById('socBillMonth');
+                if (billMonthEl && !billMonthEl.value) billMonthEl.value = prevMonthVal;
+                if (socBillMonthEl && !socBillMonthEl.value) socBillMonthEl.value = prevMonthVal;
+            }
+
+            if (pageId === 'page-monthly-report') {
+                let reportMonthInput = document.getElementById('reportMonth');
+                reportMonthInput.max = currentYearMonth;
+                if (!reportMonthInput.value) reportMonthInput.value = currentYearMonth;
+                document.getElementById('reportResultContainer').style.display = 'none';
+            }
+        }
+
+        function showPage(pageId) {
+            renderPageUI(pageId);
+        }
+
+        function openSupplierManager(mode) {
+            document.getElementById('radioAddSuppMode').checked = (mode === 'add');
+            document.getElementById('radioEditSuppMode').checked = (mode === 'manage');
+            switchSupplierMode();
+            showPage('page-supplier-manager');
+        }
+
+        function switchSupplierMode() {
+            let isAdd = document.getElementById('radioAddSuppMode').checked;
+            document.getElementById('sectionAddSupplier').style.display = isAdd ? 'block' : 'none';
+            document.getElementById('sectionManageSupplier').style.display = isAdd ? 'none' : 'block';
+        }
+
+        function openSocietyManager(mode) {
+            document.getElementById('radioAddSocMode').checked = (mode === 'add');
+            document.getElementById('radioEditSocMode').checked = (mode === 'manage');
+            switchSocietyMode();
+            showPage('page-society-manager');
+        }
+
+        function switchSocietyMode() {
+            let isAdd = document.getElementById('radioAddSocMode').checked;
+            document.getElementById('sectionAddSociety').style.display = isAdd ? 'block' : 'none';
+            document.getElementById('sectionManageSociety').style.display = isAdd ? 'none' : 'block';
+        }
+
+        function openCustomerManager(mode) {
+            document.getElementById('radioAddMode').checked = (mode === 'add');
+            document.getElementById('radioEditMode').checked = (mode === 'manage');
+            switchCustomerMode();
+            showPage('page-customer-manager');
+        }
+
+        function switchCustomerMode() {
+            let isAdd = document.getElementById('radioAddMode').checked;
+            document.getElementById('sectionAddCustomer').style.display = isAdd ? 'block' : 'none';
+            document.getElementById('sectionManageCustomer').style.display = isAdd ? 'none' : 'block';
+        }
+
+        function openMilkEntryManager(mode) {
+            document.getElementById('radioDailyEntryMode').checked = (mode === 'daily');
+            document.getElementById('radioBulkEntryMode').checked = (mode === 'bulk');
+            switchMilkEntryMode();
+            showPage('page-milk-entry');
+        }
+
+        function switchMilkEntryMode() {
+            let isDaily = document.getElementById('radioDailyEntryMode').checked;
+            document.getElementById('sectionDailyEntry').style.display = isDaily ? 'block' : 'none';
+            document.getElementById('sectionBulkEntry').style.display = isDaily ? 'none' : 'block';
+        }
+
+        function openBillingPage(mode) {
+            document.getElementById('radioSingleBill').checked = (mode === 'single');
+            document.getElementById('radioSocietyBill').checked = (mode === 'society');
+            switchBillingMode();
+            showPage('page-bill-generator');
+        }
+
+        function switchBillingMode() {
+            let isSingle = document.getElementById('radioSingleBill').checked;
+            document.getElementById('sectionSingleBill').style.display = isSingle ? 'block' : 'none';
+            document.getElementById('sectionSocietyBill').style.display = isSingle ? 'none' : 'block';
+            if (!isSingle) {
+                document.getElementById('societyBillsResultContainer').style.display = 'none';
+            }
+        }
+
+        function toggleAuthMode() {
+            isRegisterMode = !isRegisterMode;
+            document.getElementById('authTitle').innerText = isRegisterMode ? 'Dairy Registration' : 'Dairy Login';
+            document.getElementById('authSubmitBtn').innerText = isRegisterMode ? 'Register' : 'Login';
+            document.getElementById('authToggleText').innerText = isRegisterMode ? 'Pehle se account hai?' : 'Account nahi hai?';
+            document.getElementById('authToggleLink').innerText = isRegisterMode ? 'Login Karein' : 'Register Karein';
+        }
+
+        function handleAuth(e) {
+            if (e) e.preventDefault();
+            
+            let mobile = document.getElementById('authMobile').value.trim();
+            let pin = document.getElementById('authPin').value.trim();
+            let btn = document.getElementById('authSubmitBtn');
+
+            if (mobile.length < 10) {
+                alert("Kripya 10-digit Mobile Number dalein.");
+                return false;
+            }
+            if (pin.length < 6) {
+                alert("Kripya 6-digit PIN dalein.");
+                return false;
+            }
+
+            btn.innerText = "Processing...";
+            btn.disabled = true;
+
+            let userRef = db.ref('users/' + mobile);
+
+            if (isRegisterMode) {
+                userRef.once('value').then(snapshot => {
+                    if (snapshot.exists()) {
+                        alert('Yeh Mobile Number pehle se registered hai! Login karein.');
+                        btn.innerText = "Register";
+                        btn.disabled = false;
+                    } else {
+                        userRef.set({ mobile, pin, createdAt: Date.now() }).then(() => {
+                            alert('Registration Successful! Ab Login Karein.');
+                            btn.innerText = "Login";
+                            btn.disabled = false;
+                            toggleAuthMode();
+                        });
+                    }
+                }).catch(err => {
+                    alert('Error: ' + err.message);
+                    btn.innerText = "Register";
+                    btn.disabled = false;
+                });
+            } else {
+                userRef.once('value').then(snapshot => {
+                    btn.innerText = "Login";
+                    btn.disabled = false;
+                    if (snapshot.exists() && snapshot.val().pin === pin) {
+                        currentUser = { mobile, pin };
+                        localStorage.setItem('dairy_current_user', JSON.stringify(currentUser));
+                        localStorage.setItem('appCurrentDate', getFormattedDate(new Date()));
+                        initApp();
+                    } else {
+                        alert('Galat Mobile Number ya PIN!');
+                    }
+                }).catch(err => {
+                    alert('Error: ' + err.message);
+                    btn.innerText = "Login";
+                    btn.disabled = false;
+                });
+            }
+            return false;
+        }
+
+        function logout() {
+            currentUser = null;
+            localStorage.removeItem('dairy_current_user');
+            document.getElementById('logoutBtn').style.display = 'none';
+            showPage('page-auth');
+        }
+
+        function initApp() {
+            checkMidnightDateTransition();
+            if (currentUser && currentUser.mobile) {
+                document.getElementById('logoutBtn').style.display = 'block';
+                showPage('page-dashboard');
+                listenUserData();
+            } else {
+                document.getElementById('logoutBtn').style.display = 'none';
+                showPage('page-auth');
+            }
+        }
+
+        function listenUserData() {
+            if (!currentUser) return;
+            let userDbRef = db.ref('dairy_data/' + currentUser.mobile);
+            
+            userDbRef.on('value', snapshot => {
+                let data = snapshot.val() || {};
+                suppliers = Object.values(data.suppliers || {});
+                societies = Object.values(data.societies || {});
+                customers = Object.values(data.customers || {});
+                milkEntries = Object.values(data.entries || {});
+                refreshDropdowns();
+                generateAutomaticDailyEntries();
+            });
+        }
+
+        function generateAutomaticDailyEntries() {
+            if (!customers || customers.length === 0) return;
+
+            let todayDateStr = getFormattedDate(new Date());
+            let updates = {};
+            let hasNewEntries = false;
+
+            customers.forEach(cust => {
+                let existing = milkEntries.find(e => e.customerId === cust.id && e.date === todayDateStr);
+                
+                if (!existing) {
+                    let morning = parseFloat(cust.morningMilk) || 0;
+                    let evening = parseFloat(cust.eveningMilk) || 0;
+                    let rate = parseFloat(cust.rate) || 50;
+                    let totalLiters = morning + evening;
+                    let totalAmount = totalLiters * rate;
+
+                    let autoId = `AUTO_${cust.id}_${todayDateStr}`;
+                    updates[autoId] = {
+                        id: autoId,
+                        supplierId: cust.supplierId,
+                        societyId: cust.societyId,
+                        customerId: cust.id,
+                        date: todayDateStr,
+                        morning: morning,
+                        evening: evening,
+                        totalLiters: totalLiters,
+                        rate: rate,
+                        totalAmount: totalAmount,
+                        isAutoGenerated: true
+                    };
+                    hasNewEntries = true;
+                }
+            });
+
+            if (hasNewEntries) {
+                db.ref(`dairy_data/${currentUser.mobile}/entries`).update(updates);
+            }
+        }
+
+        function refreshDropdowns() {
+            let supplierSelects = ['societySupplierSelect', 'editSuppSelect', 'editSocSupplierSelect', 'custSupplierSelect', 'editCustSupplierSelect', 'entrySupplierSelect', 'bulkSupplierSelect', 'billSupplierSelect', 'socBillSupplierSelect', 'reportSupplierSelect'];
+            supplierSelects.forEach(id => {
+                let el = document.getElementById(id);
+                if (el) {
+                    let currentVal = el.value;
+                    el.innerHTML = '<option value="">-- Select Supplier --</option>';
+                    suppliers.forEach(s => el.innerHTML += `<option value="${s.id}">${s.name}</option>`);
+                    if (currentVal) el.value = currentVal;
+                }
+            });
+        }
+
+        function filterSocietyDropdown(suppSelectId, socSelectId) {
+            let suppId = document.getElementById(suppSelectId).value;
+            let socSelect = document.getElementById(socSelectId);
+            let currentSocVal = socSelect.value;
+            
+            socSelect.innerHTML = '<option value="">-- Select Society --</option>';
+            let filteredSoc = societies.filter(s => s.supplierId === suppId);
+            filteredSoc.forEach(s => socSelect.innerHTML += `<option value="${s.id}">${s.name}</option>`);
+            
+            if (currentSocVal) socSelect.value = currentSocVal;
+
+            if (socSelectId === 'editSocSelect') {
+                document.getElementById('editSocietyFormContainer').style.display = 'none';
+            }
+        }
+
+        function filterCustomerDropdown(suppSelectId, socSelectId, custSelectId) {
+            let suppId = document.getElementById(suppSelectId).value;
+            let socId = document.getElementById(socSelectId).value;
+            let custSelect = document.getElementById(custSelectId);
+            let currentCustVal = custSelect.value;
+            custSelect.innerHTML = '<option value="">-- Select Customer --</option>';
+
+            let filteredCust = customers.filter(c => c.supplierId === suppId && c.societyId === socId);
+            filteredCust.forEach(c => custSelect.innerHTML += `<option value="${c.id}">${c.name}</option>`);
+
+            if (currentCustVal) custSelect.value = currentCustVal;
+
+            if (custSelectId === 'editCustSelect') {
+                document.getElementById('editCustomerFormContainer').style.display = 'none';
+            }
+        }
+
+        function addSupplier(e) {
+            e.preventDefault();
+            let name = document.getElementById('suppName').value;
+            let dairyName = document.getElementById('suppDairyName').value;
+            let phone = document.getElementById('suppPhone').value;
+            let id = 'SUPP_' + Date.now();
+            
+            db.ref(`dairy_data/${currentUser.mobile}/suppliers/${id}`).set({ id, name, dairyName, phone }).then(() => {
+                alert('Supplier Saved Successfully!');
+                document.getElementById('suppName').value = '';
+                document.getElementById('suppDairyName').value = '';
+                document.getElementById('suppPhone').value = '';
+                showPage('page-dashboard');
+            });
+        }
+
+        function loadSupplierDataForEdit() {
+            let suppId = document.getElementById('editSuppSelect').value;
+            let formContainer = document.getElementById('editSupplierFormContainer');
+            if (!suppId) { formContainer.style.display = 'none'; return; }
+
+            let supp = suppliers.find(s => s.id === suppId);
+            if (supp) {
+                document.getElementById('editSuppName').value = supp.name;
+                document.getElementById('editSuppDairyName').value = supp.dairyName;
+                document.getElementById('editSuppPhone').value = supp.phone || '';
+                formContainer.style.display = 'block';
+            }
+        }
+
+        function promptUpdateSupplier() {
+            let suppId = document.getElementById('editSuppSelect').value;
+            if (!suppId) return;
+
+            currentSupplierActionType = 'update';
+            document.getElementById('supplierModalTitle').innerText = '⚠️ Update Supplier';
+            document.getElementById('supplierModalMsg').innerText = 'Kya aap supplier ki details badlana chahte h?';
+            document.getElementById('supplierModalYesBtn').className = 'btn';
+            document.getElementById('supplierActionModal').style.display = 'block';
+        }
+
+        function promptDeleteSupplier() {
+            let suppId = document.getElementById('editSuppSelect').value;
+            if (!suppId) return;
+
+            currentSupplierActionType = 'delete';
+            document.getElementById('supplierModalTitle').innerText = '⚠️ Delete Supplier';
+            document.getElementById('supplierModalMsg').innerText = 'Kya aap supplier delete krna chahte h?';
+            document.getElementById('supplierModalYesBtn').className = 'btn btn-danger';
+            document.getElementById('supplierActionModal').style.display = 'block';
+        }
+
+        function closeSupplierActionModal() {
+            currentSupplierActionType = '';
+            document.getElementById('supplierActionModal').style.display = 'none';
+        }
+
+        function executeSupplierAction() {
+            let suppId = document.getElementById('editSuppSelect').value;
+            if (!suppId) { closeSupplierActionModal(); return; }
+
+            if (currentSupplierActionType === 'update') {
+                let updatedData = {
+                    id: suppId,
+                    name: document.getElementById('editSuppName').value,
+                    dairyName: document.getElementById('editSuppDairyName').value,
+                    phone: document.getElementById('editSuppPhone').value
+                };
+
+                db.ref(`dairy_data/${currentUser.mobile}/suppliers/${suppId}`).update(updatedData).then(() => {
+                    closeSupplierActionModal();
+                    alert('Supplier Details Updated Successfully!');
+                    document.getElementById('editSupplierFormContainer').style.display = 'none';
+                    document.getElementById('editSuppSelect').value = '';
+                });
+            } else if (currentSupplierActionType === 'delete') {
+                db.ref(`dairy_data/${currentUser.mobile}/suppliers/${suppId}`).remove().then(() => {
+                    closeSupplierActionModal();
+                    alert('Supplier Deleted Successfully!');
+                    document.getElementById('editSupplierFormContainer').style.display = 'none';
+                    document.getElementById('editSuppSelect').value = '';
+                });
+            }
+        }
+
+        function addSociety(e) {
+            e.preventDefault();
+            let supplierId = document.getElementById('societySupplierSelect').value;
+            let name = document.getElementById('societyName').value;
+            let id = 'SOC_' + Date.now();
+
+            db.ref(`dairy_data/${currentUser.mobile}/societies/${id}`).set({ id, supplierId, name }).then(() => {
+                alert('Society Saved Successfully!');
+                document.getElementById('societyName').value = '';
+                showPage('page-dashboard');
+            });
+        }
+
+        function loadSocietyDataForEdit() {
+            let socId = document.getElementById('editSocSelect').value;
+            let formContainer = document.getElementById('editSocietyFormContainer');
+            if (!socId) { formContainer.style.display = 'none'; return; }
+
+            let soc = societies.find(s => s.id === socId);
+            if (soc) {
+                document.getElementById('editSocName').value = soc.name;
+                formContainer.style.display = 'block';
+            }
+        }
+
+        function promptUpdateSociety() {
+            let socId = document.getElementById('editSocSelect').value;
+            if (!socId) return;
+
+            currentSocietyActionType = 'update';
+            document.getElementById('societyModalTitle').innerText = '⚠️ Update Society';
+            document.getElementById('societyModalMsg').innerText = 'Kya aap society ki details badlana chahte h?';
+            document.getElementById('societyModalYesBtn').className = 'btn';
+            document.getElementById('societyActionModal').style.display = 'block';
+        }
+
+        function promptDeleteSociety() {
+            let socId = document.getElementById('editSocSelect').value;
+            if (!socId) return;
+
+            currentSocietyActionType = 'delete';
+            document.getElementById('societyModalTitle').innerText = '⚠️ Delete Society';
+            document.getElementById('societyModalMsg').innerText = 'Kya aap society delete krna chahte h?';
+            document.getElementById('societyModalYesBtn').className = 'btn btn-danger';
+            document.getElementById('societyActionModal').style.display = 'block';
+        }
+
+        function closeSocietyActionModal() {
+            currentSocietyActionType = '';
+            document.getElementById('societyActionModal').style.display = 'none';
+        }
+
+        function executeSocietyAction() {
+            let socId = document.getElementById('editSocSelect').value;
+            if (!socId) { closeSocietyActionModal(); return; }
+
+            if (currentSocietyActionType === 'update') {
+                let updatedData = {
+                    id: socId,
+                    supplierId: document.getElementById('editSocSupplierSelect').value,
+                    name: document.getElementById('editSocName').value
+                };
+
+                db.ref(`dairy_data/${currentUser.mobile}/societies/${socId}`).update(updatedData).then(() => {
+                    closeSocietyActionModal();
+                    alert('Society Details Updated Successfully!');
+                    document.getElementById('editSocietyFormContainer').style.display = 'none';
+                    document.getElementById('editSocSelect').value = '';
+                });
+            } else if (currentSocietyActionType === 'delete') {
+                db.ref(`dairy_data/${currentUser.mobile}/societies/${socId}`).remove().then(() => {
+                    closeSocietyActionModal();
+                    alert('Society Deleted Successfully!');
+                    document.getElementById('editSocietyFormContainer').style.display = 'none';
+                    document.getElementById('editSocSelect').value = '';
+                });
+            }
+        }
+
+        function addCustomer(e) {
+            e.preventDefault();
+            let supplierId = document.getElementById('custSupplierSelect').value;
+            let societyId = document.getElementById('custSocietySelect').value;
+            let name = document.getElementById('custName').value;
+            let phone = document.getElementById('custPhone').value;
+            let isCow = document.getElementById('custCow').checked;
+            let isBuffalo = document.getElementById('custBuffalo').checked;
+            let rate = document.getElementById('custRate').value;
+            let morningMilk = document.getElementById('custMorningMilk').value;
+            let eveningMilk = document.getElementById('custEveningMilk').value;
+            let id = 'CUST_' + Date.now();
+
+            db.ref(`dairy_data/${currentUser.mobile}/customers/${id}`).set({ 
+                id, supplierId, societyId, name, phone, isCow, isBuffalo, rate, morningMilk, eveningMilk 
+            }).then(() => {
+                alert('Customer Saved Successfully!');
+                document.getElementById('custName').value = '';
+                document.getElementById('custPhone').value = '';
+                generateAutomaticDailyEntries();
+                showPage('page-dashboard');
+            });
+        }
+
+        function loadCustomerDataForEdit() {
+            let custId = document.getElementById('editCustSelect').value;
+            let formContainer = document.getElementById('editCustomerFormContainer');
+            if (!custId) { formContainer.style.display = 'none'; return; }
+
+            let cust = customers.find(c => c.id === custId);
+            if (cust) {
+                document.getElementById('editCustName').value = cust.name;
+                document.getElementById('editCustPhone').value = cust.phone;
+                document.getElementById('editCustCow').checked = cust.isCow || false;
+                document.getElementById('editCustBuffalo').checked = cust.isBuffalo || false;
+                document.getElementById('editCustRate').value = cust.rate;
+                document.getElementById('editCustMorning').value = cust.morningMilk;
+                document.getElementById('editCustEvening').value = cust.eveningMilk;
+                formContainer.style.display = 'block';
+            }
+        }
+
+        function updateCustomerDetails() {
+            let custId = document.getElementById('editCustSelect').value;
+            if (!custId) return;
+
+            let updatedData = {
+                id: custId,
+                supplierId: document.getElementById('editCustSupplierSelect').value,
+                societyId: document.getElementById('editCustSocietySelect').value,
+                name: document.getElementById('editCustName').value,
+                phone: document.getElementById('editCustPhone').value,
+                isCow: document.getElementById('editCustCow').checked,
+                isBuffalo: document.getElementById('editCustBuffalo').checked,
+                rate: document.getElementById('editCustRate').value,
+                morningMilk: document.getElementById('editCustMorning').value,
+                eveningMilk: document.getElementById('editCustEvening').value
+            };
+
+            db.ref(`dairy_data/${currentUser.mobile}/customers/${custId}`).update(updatedData).then(() => {
+                alert('Customer Details Updated Successfully!');
+                document.getElementById('editCustomerFormContainer').style.display = 'none';
+                document.getElementById('editCustSelect').value = '';
+            });
+        }
+
+        function deleteSelectedCustomer() {
+            let custId = document.getElementById('editCustSelect').value;
+            if (!custId) return;
+
+            if (confirm("Kya aap sach me is Customer ko delete karna chahte hain?")) {
+                db.ref(`dairy_data/${currentUser.mobile}/customers/${custId}`).remove().then(() => {
+                    alert('Customer Deleted Successfully!');
+                    document.getElementById('editCustomerFormContainer').style.display = 'none';
+                    document.getElementById('editCustSelect').value = '';
+                });
+            }
+        }
+
+        function autoFillCustomerMilkData() {
+            let custId = document.getElementById('entryCustomerSelect').value;
+            let selectedDate = document.getElementById('entryDate').value;
+            let badge = document.getElementById('customerMilkBadge');
+            
+            if (!custId) { badge.innerText = ''; return; }
+
+            let cust = customers.find(c => c.id === custId);
+            if (cust) {
+                let types = [];
+                if (cust.isCow) types.push('🐄 Cow Milk');
+                if (cust.isBuffalo) types.push('🐃 Buffalo Milk');
+                badge.innerText = types.length > 0 ? `Milk Type: ${types.join(' & ')}` : '';
+            }
+
+            let existing = milkEntries.find(item => item.customerId === custId && item.date === selectedDate);
+            if (existing) {
+                document.getElementById('entryMorning').value = existing.morning;
+                document.getElementById('entryEvening').value = existing.evening;
+                document.getElementById('entryRate').value = existing.rate;
+            } else if (cust) {
+                document.getElementById('entryMorning').value = cust.morningMilk;
+                document.getElementById('entryEvening').value = cust.eveningMilk;
+                document.getElementById('entryRate').value = cust.rate;
+            }
+        }
+
+        function autoFillBulkCustomerData() {
+            let custId = document.getElementById('bulkCustomerSelect').value;
+            if (!custId) return;
+            let cust = customers.find(c => c.id === custId);
+            if (cust) {
+                document.getElementById('bulkMorning').value = cust.morningMilk;
+                document.getElementById('bulkEvening').value = cust.eveningMilk;
+                document.getElementById('bulkRate').value = cust.rate;
+            }
+        }
+
+        function handleMilkEntrySubmit(e) {
+            e.preventDefault();
+            let supplierId = document.getElementById('entrySupplierSelect').value;
+            let societyId = document.getElementById('entrySocietySelect').value;
+            let customerId = document.getElementById('entryCustomerSelect').value;
+            let date = document.getElementById('entryDate').value;
+            let morning = parseFloat(document.getElementById('entryMorning').value) || 0;
+            let evening = parseFloat(document.getElementById('entryEvening').value) || 0;
+            let rate = parseFloat(document.getElementById('entryRate').value) || 0;
+
+            let todayStr = getFormattedDate(new Date());
+            if (date > todayStr) {
+                alert("Bhavishya (Future) ki date me milk entry nahi ki ja sakti!");
+                return;
+            }
+
+            let totalLiters = morning + evening;
+            let totalAmount = totalLiters * rate;
+
+            let entryPayload = {
+                supplierId, societyId, customerId, date, morning, evening, totalLiters, rate, totalAmount, isAutoGenerated: false
+            };
+
+            let existingEntry = milkEntries.find(item => 
+                item.supplierId === supplierId && item.societyId === societyId && item.customerId === customerId && item.date === date
+            );
+
+            if (existingEntry) {
+                pendingEntryData = { existingId: existingEntry.id, payload: entryPayload };
+                document.getElementById('updateConfirmMsg').innerText = `Is customer ki (${date}) ki entry pehle se mojood hai. Update karein?`;
+                document.getElementById('updateConfirmModal').style.display = 'block';
+                return;
+            }
+
+            saveMilkEntryToFirebase('ENTRY_' + Date.now(), entryPayload);
+        }
+
+        function handleBulkMonthlyEntry(e) {
+            e.preventDefault();
+            let supplierId = document.getElementById('bulkSupplierSelect').value;
+            let societyId = document.getElementById('bulkSocietySelect').value;
+            let customerId = document.getElementById('bulkCustomerSelect').value;
+            let yearMonth = document.getElementById('bulkMonth').value; 
+            let morning = parseFloat(document.getElementById('bulkMorning').value) || 0;
+            let evening = parseFloat(document.getElementById('bulkEvening').value) || 0;
+            let rate = parseFloat(document.getElementById('bulkRate').value) || 0;
+
+            if (!supplierId || !societyId || !customerId || !yearMonth) {
+                alert('Kripya sabhi fields select karein!');
+                return;
+            }
+
+            let currentYearMonth = getFormattedDate(new Date()).substring(0, 7);
+            if (yearMonth > currentYearMonth) {
+                alert("Bhavishya (Future) ke mahine ki bulk entry nahi ki ja sakti!");
+                return;
+            }
+
+            let [year, month] = yearMonth.split('-').map(Number);
+            let totalDays = new Date(year, month, 0).getDate(); 
+            let updates = {};
+            let totalLiters = morning + evening;
+            let totalAmount = totalLiters * rate;
+
+            for (let day = 1; day <= totalDays; day++) {
+                let dayStr = String(day).padStart(2, '0');
+                let dateStr = `${year}-${String(month).padStart(2, '0')}-${dayStr}`;
+                
+                if (dateStr > getFormattedDate(new Date())) continue;
+
+                let existing = milkEntries.find(item => item.customerId === customerId && item.date === dateStr);
+                let entryId = existing ? existing.id : `BULK_${customerId}_${dateStr}`;
+
+                updates[entryId] = {
+                    id: entryId, supplierId, societyId, customerId, date: dateStr, morning, evening, totalLiters, rate, totalAmount, isAutoGenerated: false
+                };
+            }
+
+            db.ref(`dairy_data/${currentUser.mobile}/entries`).update(updates).then(() => {
+                alert(`Customer ki mahine ki sabhi entries safaltapurvak save ho gayi hain!`);
+                document.getElementById('bulkCustomerSelect').value = '';
+                document.getElementById('bulkMorning').value = '';
+                document.getElementById('bulkEvening').value = '';
+                document.getElementById('bulkRate').value = '';
+            });
+        }
+
+        function confirmUpdateEntry() {
+            if (pendingEntryData) {
+                saveMilkEntryToFirebase(pendingEntryData.existingId, pendingEntryData.payload);
+                closeUpdateModal();
+            }
+        }
+
+        function closeUpdateModal() {
+            pendingEntryData = null;
+            document.getElementById('updateConfirmModal').style.display = 'none';
+        }
+
+        function saveMilkEntryToFirebase(id, payload) {
+            payload.id = id;
+            db.ref(`dairy_data/${currentUser.mobile}/entries/${id}`).set(payload).then(() => {
+                alert('Milk Entry Successfully Saved!');
+                
+                let keptSupplier = payload.supplierId;
+                let keptSociety = payload.societyId;
+                let todayStr = getFormattedDate(new Date());
+
+                document.getElementById('entryCustomerSelect').value = '';
+                document.getElementById('entryMorning').value = '';
+                document.getElementById('entryEvening').value = '';
+                document.getElementById('entryRate').value = '';
+                document.getElementById('customerMilkBadge').innerText = '';
+                document.getElementById('entryDate').value = todayStr;
+
+                document.getElementById('entrySupplierSelect').value = keptSupplier;
+                filterSocietyDropdown('entrySupplierSelect', 'entrySocietySelect');
+                document.getElementById('entrySocietySelect').value = keptSociety;
+                filterCustomerDropdown('entrySupplierSelect', 'entrySocietySelect', 'entryCustomerSelect');
+            });
+        }
+
+        function formatDisplayMonth(monthVal) {
+            if (!monthVal) return "-";
+            let [year, month] = monthVal.split('-');
+            let dateObj = new Date(year, month - 1, 1);
+            let monthStr = dateObj.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+            return `${monthStr}-${year}`;
+        }
+
+        function generateThermalBill() {
+            let supplierId = document.getElementById('billSupplierSelect').value;
+            let custId = document.getElementById('billCustomerSelect').value;
+            let selectedMonth = document.getElementById('billMonth').value; 
+            let lastDue = parseFloat(document.getElementById('billLastDue').value) || 0;
+
+            if (!supplierId || !custId || !selectedMonth) return alert('Kripya saare options select karein!');
+
+            let supp = suppliers.find(s => s.id === supplierId);
+            let cust = customers.find(c => c.id === custId);
+            let filtered = milkEntries.filter(e => e.customerId === custId && e.date.startsWith(selectedMonth));
+
+            let totalLiters = filtered.reduce((acc, curr) => acc + curr.totalLiters, 0);
+            let currentMilkAmount = filtered.reduce((acc, curr) => acc + curr.totalAmount, 0);
+            let grandTotal = currentMilkAmount + lastDue;
+
+            let milkTypesStr = '-';
+            if (cust) {
+                let t = [];
+                if (cust.isCow) t.push('Cow');
+                if (cust.isBuffalo) t.push('Buffalo');
+                if (t.length > 0) milkTypesStr = t.join(' & ');
+            }
+
+            document.getElementById('tDairyName').innerText = supp && supp.dairyName ? supp.dairyName : 'CHIRAG MILK DAIRY';
+            document.getElementById('tBillDate').innerText = new Date().toLocaleDateString();
+            document.getElementById('tCustName').innerText = cust ? cust.name : '-';
+            document.getElementById('tMilkType').innerText = milkTypesStr;
+            document.getElementById('tMonth').innerText = formatDisplayMonth(selectedMonth);
+            window.activeBillMonthName = formatDisplayMonth(selectedMonth);
+            window.activeBillMonthRaw = selectedMonth; 
+            document.getElementById('tTotalDays').innerText = filtered.length;
+            document.getElementById('tTotalLiters').innerText = totalLiters.toFixed(1) + ' L';
+            document.getElementById('tAvgRate').innerText = cust ? '₹' + cust.rate : '-';
+            document.getElementById('tMilkAmount').innerText = '₹' + currentMilkAmount.toFixed(2);
+            document.getElementById('tLastDue').innerText = '₹' + lastDue.toFixed(2);
+            document.getElementById('tTotalAmount').innerText = '₹' + grandTotal.toFixed(2);
+
+            window.activeCustPhoneForShare = cust ? cust.phone : '';
+            window.activeBillData = {
+                dairyName: supp && supp.dairyName ? supp.dairyName : 'CHIRAG MILK DAIRY',
+                billDate: new Date().toLocaleDateString(),
+                custName: cust ? cust.name : '-',
+                milkType: milkTypesStr,
+                month: formatDisplayMonth(selectedMonth),
+                totalDays: filtered.length,
+                totalLiters: totalLiters.toFixed(1),
+                avgRate: cust ? cust.rate : '-',
+                milkAmount: currentMilkAmount.toFixed(2),
+                lastDue: lastDue.toFixed(2),
+                grandTotal: grandTotal.toFixed(2)
+            };
+
+            document.getElementById('billModal').style.display = 'block';
+        }
+
+        function shareBillAsWhatsAppText() {
+            let data = window.activeBillData;
+            let phone = window.activeCustPhoneForShare || '';
+            
+            if (!data) {
+                alert('Pehle bill generate karein!');
+                return;
+            }
+
+            let msg = `*🥛 ${data.dairyName} 🥛*\n`;
+            msg += `--------------------------------\n`;
+            msg += `📋 *Monthly Milk Bill*\n`;
+            msg += `📅 Bill Date: ${data.billDate}\n`;
+            msg += `👤 Customer: ${data.custName}\n`;
+            msg += `🐄 Milk Type: ${data.milkType}\n`;
+            msg += `🗓️ Month: ${data.month}\n`;
+            msg += `--------------------------------\n`;
+            msg += `📊 Total Entry: ${data.totalDays}\n`;
+            msg += `🥛 Total Milk: ${data.totalLiters} L\n`;
+            msg += `💰 Milk Rate: ₹${data.avgRate}/L\n`;
+            msg += `💵 Milk Amount: ₹${data.milkAmount}\n`;
+            msg += `⏳ Last Due: ₹${data.lastDue}\n`;
+            msg += `--------------------------------\n`;
+            msg += `📌 *TOTAL BILL: ₹${data.grandTotal}*\n`;
+            msg += `--------------------------------\n`;
+            msg += `*** Thank You! ***`;
+
+            let encodedMsg = encodeURIComponent(msg);
+            let whatsappUrl = phone ? `https://wa.me/91${phone}?text=${encodedMsg}` : `https://wa.me/?text=${encodedMsg}`;
+            
+            window.open(whatsappUrl, '_blank');
+        }
+
+        function generateSocietyWiseBill() {
+            let supplierId = document.getElementById('socBillSupplierSelect').value;
+            let societyId = document.getElementById('socBillSocietySelect').value;
+            let selectedMonth = document.getElementById('socBillMonth').value;
+
+            if (!supplierId || !societyId || !selectedMonth) {
+                alert('Kripya Supplier, Society aur Month select karein!');
+                return;
+            }
+
+            let supp = suppliers.find(s => s.id === supplierId);
+            let socCustomers = customers.filter(c => c.supplierId === supplierId && c.societyId === societyId);
+
+            if (socCustomers.length === 0) {
+                alert('Is Society me koi Customer nahi hai!');
+                return;
+            }
+
+            let dairyName = supp && supp.dairyName ? supp.dairyName : 'CHIRAG MILK DAIRY';
+            let monthName = formatDisplayMonth(selectedMonth);
+            let billDateStr = new Date().toLocaleDateString();
+
+            let container = document.getElementById('societyBillsCardsList');
+            container.innerHTML = '';
+
+            socCustomers.forEach(cust => {
+                let filtered = milkEntries.filter(e => e.customerId === cust.id && e.date.startsWith(selectedMonth));
+                let custLiters = filtered.reduce((sum, item) => sum + item.totalLiters, 0);
+                let custAmt = filtered.reduce((sum, item) => sum + item.totalAmount, 0);
+
+                let milkTypeArr = [];
+                if (cust.isCow) milkTypeArr.push('Cow');
+                if (cust.isBuffalo) milkTypeArr.push('Buffalo');
+                let milkTypeStr = milkTypeArr.length > 0 ? milkTypeArr.join(' & ') : '-';
+
+                let customerName = cust.name || 'Customer';
+
+                let cardDiv = document.createElement('div');
+                cardDiv.className = 'society-bill-card';
+                cardDiv.innerHTML = `
+                    <h4>👤 ${customerName} &nbsp;|&nbsp; 📞 ${cust.phone || 'N/A'}</h4>
+                    <p style="font-size: 13px; color: #475569; margin-bottom: 8px;">🥛 Total: <b>${custLiters.toFixed(1)} L</b> &nbsp;|&nbsp; 💵 Amount: <b style="color: var(--primary-dark);">₹${custAmt.toFixed(2)}</b></p>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 0;">
+                        <button class="btn" style="background: #4f46e5; margin-top:0; padding: 10px; font-size: 13px;" onclick="shareSocietyCustomerBillAsImage('${dairyName}', '${billDateStr}', '${customerName}', '${milkTypeStr}', '${monthName}', '${filtered.length}', '${custLiters.toFixed(1)}', '${cust.rate}', '${custAmt.toFixed(2)}', '0')">📷 Bill Image</button>
+                        <button class="btn btn-whatsapp" style="margin-top:0; padding: 10px; font-size: 13px;" onclick="shareSocietyCustomerBillAsText('${dairyName}', '${billDateStr}', '${customerName}', '${milkTypeStr}', '${monthName}', '${filtered.length}', '${custLiters.toFixed(1)}', '${cust.rate}', '${custAmt.toFixed(2)}', '0', '${cust.phone || ''}')">Text Bill</button>
+                    </div>
+                `;
+
+                container.appendChild(cardDiv);
+            });
+
+            document.getElementById('societyBillsResultContainer').style.display = 'block';
+        }
+
+        function shareSocietyCustomerBillAsText(dairyName, billDate, custName, milkType, month, totalDays, totalLiters, rate, milkAmount, lastDue, phone) {
+            let msg = `*🥛 ${dairyName} 🥛*\n`;
+            msg += `--------------------------------\n`;
+            msg += `📋 *Monthly Milk Bill*\n`;
+            msg += `📅 Bill Date: ${billDate}\n`;
+            msg += `👤 Customer: ${custName}\n`;
+            msg += `🐄 Milk Type: ${milkType}\n`;
+            msg += `🗓️ Month: ${month}\n`;
+            msg += `--------------------------------\n`;
+            msg += `📊 Total Entry: ${totalDays}\n`;
+            msg += `🥛 Total Milk: ${totalLiters} L\n`;
+            msg += `💰 Milk Rate: ₹${rate}/L\n`;
+            msg += `💵 Milk Amount: ₹${milkAmount}\n`;
+            msg += `⏳ Last Due: ₹${lastDue}\n`;
+            msg += `--------------------------------\n`;
+            msg += `📌 *TOTAL BILL: ₹${milkAmount}*\n`;
+            msg += `--------------------------------\n`;
+            msg += `*** Thank You! ***`;
+
+            let encodedMsg = encodeURIComponent(msg);
+            let whatsappUrl = phone ? `https://wa.me/91${phone}?text=${encodedMsg}` : `https://wa.me/?text=${encodedMsg}`;
+            window.open(whatsappUrl, '_blank');
+        }
+
+        function shareSocietyCustomerBillAsImage(dairyName, billDate, custName, milkType, month, totalDays, totalLiters, rate, milkAmount, lastDue) {
+            document.getElementById('socTDairyName').innerText = dairyName;
+            document.getElementById('socTBillDate').innerText = billDate;
+            document.getElementById('socTCustName').innerText = custName;
+            document.getElementById('socTMilkType').innerText = milkType;
+            document.getElementById('socTMonth').innerText = month;
+            document.getElementById('socTTotalDays').innerText = totalDays;
+            document.getElementById('socTTotalLiters').innerText = totalLiters + ' L';
+            document.getElementById('socTAvgRate').innerText = '₹' + rate;
+            document.getElementById('socTMilkAmount').innerText = '₹' + milkAmount;
+            document.getElementById('socTLastDue').innerText = '₹' + lastDue;
+            document.getElementById('socTTotalAmount').innerText = '₹' + milkAmount;
+
+            let cardElement = document.getElementById('societyThermalBillCard');
+
+            html2canvas(cardElement, { scale: 2, useCORS: true, backgroundColor: '#ffffff' }).then(canvas => {
+                canvas.toBlob(blob => {
+                    let file = new File([blob], `Bill_${custName}_${month}.png`, { type: "image/png" });
+                    let shareMessage = `Hello ${custName}, Ye Hai Aapka ${month} ka Milk Bill.`;
+
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        navigator.share({
+                            files: [file],
+                            title: 'Milk Bill',
+                            text: shareMessage
+                        }).catch(() => {});
+                    } else {
+                        alert("Sharing supported nahi hai.");
+                    }
+                });
+            });
+        }
+
+        function closeBillModal() {
+            document.getElementById('billModal').style.display = 'none';
+        }
+
+        function loadCustomerMonthlyReport() {
+            let supplierId = document.getElementById('reportSupplierSelect').value;
+            let custId = document.getElementById('reportCustomerSelect').value;
+            let selectedMonth = document.getElementById('reportMonth').value;
+
+            if (!supplierId || !custId || !selectedMonth) {
+                alert('Kripya saare options select karein!');
+                return;
+            }
+
+            let cust = customers.find(c => c.id === custId);
+            let filteredEntries = milkEntries.filter(e => e.customerId === custId && e.date.startsWith(selectedMonth));
+            filteredEntries.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            let tbody = document.getElementById('reportTableBody');
+            tbody.innerHTML = '';
+
+            let totalLitersSum = 0;
+            let totalAmountSum = 0;
+
+            if (filteredEntries.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 15px; color: #64748b;">Is mahine ki koi entry nahi mili.</td></tr>`;
+            } else {
+                filteredEntries.forEach(entry => {
+                    totalLitersSum += entry.totalLiters;
+                    totalAmountSum += entry.totalAmount;
+                    tbody.innerHTML += `
+                        <tr style="border-bottom: 1px solid var(--border-color);">
+                            <td style="padding: 8px;">${entry.date}</td>
+                            <td style="padding: 8px;">${entry.morning}</td>
+                            <td style="padding: 8px;">${entry.evening}</td>
+                            <td style="padding: 8px; font-weight: bold;">${entry.totalLiters.toFixed(1)}</td>
+                            <td style="padding: 8px; color: var(--primary-dark); font-weight: bold;">₹${entry.totalAmount.toFixed(2)}</td>
+                        </tr>
+                    `;
+                });
+            }
+
+            document.getElementById('reportTitle').innerText = `Report for: ${cust ? cust.name : 'Customer'} (${formatDisplayMonth(selectedMonth)})`;
+            document.getElementById('repTotalLiters').innerText = totalLitersSum.toFixed(1);
+            document.getElementById('repTotalAmt').innerText = '₹' + totalAmountSum.toFixed(2);
+            document.getElementById('reportResultContainer').style.display = 'block';
+        }
+
+        async function shareBillAsImage() {
+            const billCardElement = document.getElementById('thermalBillCard');
+            const monthName = window.activeBillMonthName || 'Monthly';
+            const custName = document.getElementById('tCustName').innerText || 'Customer';
+
+            try {
+                const canvas = await html2canvas(billCardElement, {
+                    scale: 3,
+                    useCORS: true,
+                    backgroundColor: '#ffffff'
+                });
+
+                const blob = await new Promise(resolve =>
+                    canvas.toBlob(resolve, 'image/png', 1.0)
+                );
+
+                const file = new File([blob], `Bill_${custName}_${monthName}.png`, {
+                    type: 'image/png'
+                });
+
+                let shareMessage = `Hello ${custName}, Ye Hai Aapka ${monthName} ka Milk Bill.`;
+
+                if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                    await navigator.share({
+                        files: [file],
+                        title: 'Milk Bill',
+                        text: shareMessage
+                    });
+                    closeBillModal();
+                    return;
+                } else {
+                    alert('Sharing supported nahi hai.');
+                }
+
+            } catch (err) {
+                console.error(err);
+                alert('Image share karne me problem aa rahi hai.');
+            }
+        }
+
+        window.onload = function() {
+            initApp();
+        };
+    </script>
+</body>
+</html>
